@@ -1,0 +1,28 @@
+{
+    "name": "dmbur/simple-chat-application",
+    "description": "Simple chat on websockets",
+    "type": "project",
+    "license": "MIT",
+    "require": {
+        "php": "^5.5 || ^7.0",
+        "cboden/ratchet": "^0.3.6",
+        "zendframework/zend-stdlib": "^3.0",
+        "zendframework/zend-servicemanager": "^3.1"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^4.8"
+    },
+    "autoload": {
+        "psr-4": {
+            "ChatApp\\": "src/ChatApp/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "AppTest\\": "test/AppTest/"
+        }
+    },
+    "scripts": {
+        "test": "phpunit --colors=always"
+    }
+}
