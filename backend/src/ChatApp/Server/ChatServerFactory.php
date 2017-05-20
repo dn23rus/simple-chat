@@ -15,7 +15,7 @@ class ChatServerFactory implements FactoryInterface
      */
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
-        $cnf = $container->get('Config');
+        $cnf = $container->get('config');
         $cnf = $cnf['chat-server'];
 
         $server = IoServer::factory(

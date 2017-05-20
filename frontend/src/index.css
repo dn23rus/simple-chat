@@ -1,0 +1,107 @@
+.ChatApplication {
+  margin: 0 auto;
+  width: 600px;
+  font-family: Verdana,sans-serif; }
+  .ChatApplication_W {
+    width: 100%;
+    height: 100%;
+    padding: 15px 20px;
+    margin: 0;
+    background-color: #f4f0ff;
+    text-align: center;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    -ms-border-radius: 5px;
+    border-radius: 5px; }
+  .ChatApplication .ConnectionInput {
+    margin: 0 auto;
+    width: 100%; }
+    .ChatApplication .ConnectionInput_Label {
+      font-size: 15px;
+      margin-right: 10px;
+      color: gray; }
+    .ChatApplication .ConnectionInput_Input {
+      width: 250px;
+      height: 20px;
+      padding: 1px 3px;
+      margin-right: 10px;
+      border: 1px solid #43a2ff;
+      -webkit-border-radius: 3px;
+      -moz-border-radius: 3px;
+      -ms-border-radius: 3px;
+      border-radius: 3px; }
+    .ChatApplication .ConnectionInput_Button {
+      width: 70px;
+      height: 25px;
+      cursor: pointer;
+      background-color: #43a2ff;
+      border: 1px solid #43a2ff;
+      -webkit-border-radius: 3px;
+      -moz-border-radius: 3px;
+      -ms-border-radius: 3px;
+      border-radius: 3px; }
+      .ChatApplication .ConnectionInput_Button span {
+        color: white; }
+  .ChatApplication .MessageInput_Input {
+    width: 85%;
+    height: 20px;
+    padding: 1px 3px;
+    margin-right: 10px;
+    border: 1px solid #43a2ff;
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    -ms-border-radius: 3px;
+    border-radius: 3px; }
+  .ChatApplication .MessageInput_Button {
+    width: 70px;
+    height: 25px;
+    cursor: pointer;
+    background-color: #43a2ff;
+    border: 1px solid #43a2ff;
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    -ms-border-radius: 3px;
+    border-radius: 3px; }
+    .ChatApplication .MessageInput_Button span {
+      color: white; }
+  .ChatApplication .MessageOutput {
+    margin-bottom: 10px;
+    min-height: 402px;
+    position: relative;
+    overflow: hidden; }
+    .ChatApplication .MessageOutput_List {
+      width: 100%;
+      margin: 0;
+      padding: 0;
+      position: absolute;
+      bottom: 0;
+      left: 0; }
+      .ChatApplication .MessageOutput_List ul, .ChatApplication .MessageOutput_List li {
+        list-style-type: none; }
+    .ChatApplication .MessageOutput_Item {
+      width: 100%;
+      display: inline-block;
+      text-align: left;
+      color: gray;
+      border-bottom: 1px dotted #dedbe8;
+      line-height: 1.1em; }
+    .ChatApplication .MessageOutput_P {
+      margin: 0;
+      font-size: 12px; }
+    .ChatApplication .MessageOutput_Text {
+      float: left;
+      margin-right: 5px; }
+    .ChatApplication .MessageOutput_Text__Info {
+      font-style: italic;
+      color: #76d0d6; }
+    .ChatApplication .MessageOutput_Username {
+      color: black;
+      float: left;
+      margin-right: 5px; }
+    .ChatApplication .MessageOutput_Username__Own {
+      color: orange; }
+    .ChatApplication .MessageOutput_Datetime {
+      float: right;
+      font-size: 10px; }
+
+/*# sourceMappingURL=index.css.map */
