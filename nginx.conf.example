@@ -1,0 +1,37 @@
+server {
+  listen                *:80;
+
+  server_name           chat-application.loc www.chat-application.loc;
+  client_max_body_size 1m;
+
+  root /var/www/current/frontend/build;
+  index  index.html index.htm index.php;
+
+  access_log            /var/log/nginx/chat-application.access.log;
+  error_log             /var/log/nginx/chat-application.error.log;
+  location ~ \.php$ {
+
+
+    set $path_info $fastcgi_path_info;
+    root  /var/www/current/backend/public;
+    fastcgi_index index.php;
+    fastcgi_split_path_info ^(.+\.php)(/.*)$;
+    try_files $uri $uri/ /index.php$is_args$args;
+    include /etc/nginx/fastcgi_params;
+    fastcgi_pass 127.0.0.1:9000;
+
+    fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+
+  }
+  location /backend {
+
+
+    root  /var/www/current/backend/public;
+    try_files $uri $uri/ /index.php$is_args$args;
+    autoindex on;
+    index  index.html index.php;
+
+
+  }
+  sendfile off;
+}
