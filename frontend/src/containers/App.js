@@ -4,6 +4,7 @@ import {connect} from 'react-redux'
 import MessageInput from '../containers/MessageInput';
 import MessageOutput from '../containers/MessageOutput';
 import ConnectionInput from '../containers/ConnectionInput';
+import DesktopNotification from '../containers/DesktopNotification'
 import {
     SOCKET_STATE_CONNECTED,
     SOCKET_STATE_CONNECTING,
@@ -34,6 +35,7 @@ class App extends Component {
                     <div className="ChatApplication_W">
                         <MessageOutput/>
                         <MessageInput/>
+                        <DesktopNotification title="Simple Chat Application"/>
                     </div>
                 );
             default:
