@@ -1,10 +1,10 @@
 import React from 'react'
-import {sendMessage} from '../actions/connection'
+import {sendMessage, sendStartTyping, sendStopTyping} from '../actions/connection'
 
 const MessageInput = ({dispatch}) => {
     let input;
     return (
-        <div className="MessageInput">
+        <div className="message-panel__form">
             <form onSubmit={e => {
                 e.preventDefault();
                 if (!input.value.trim()) {
@@ -13,10 +13,18 @@ const MessageInput = ({dispatch}) => {
                 dispatch(sendMessage(input.value));
                 input.value = '';
             }}>
-                <input className="MessageInput_Input" id="message" type="text" ref={node => {
+                <input className="message-panel__input" id="message" type="text" ref={node => {
                     input = node
+                }} onKeyDown={e => {
+                    if (input.value.trim()) {
+                        if (e.which === 13) {
+                            dispatch(sendStopTyping());
+                        } else {
+                            dispatch(sendStartTyping());
+                        }
+                    }
                 }}/>
-                <button className="MessageInput_Button" type="submit">
+                <button className="message-panel__submit" type="submit">
                     <span>Send</span>
                 </button>
             </form>

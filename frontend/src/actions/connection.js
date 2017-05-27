@@ -7,6 +7,11 @@ import {
     CHAT_RECEIVE_MESSAGE,
     SOCKET_ERROR
 } from './types';
+import {
+    MESSAGE_TYPE_MESSAGE,
+    MESSAGE_TYPE_USER_START_TYPING,
+    MESSAGE_TYPE_USER_STOP_TYPING
+} from '../constants';
 
 const socketConnected = (name) => {
     return {
@@ -26,7 +31,7 @@ export const socketDisconnect = () => ({
     type: SOCKET_DISCONNECT
 });
 
-export const sendMessage = (text, type = 'MESSAGE') => ({
+export const sendMessage = (text, type = MESSAGE_TYPE_MESSAGE) => ({
     type: CHAT_SEND_MESSAGE,
     message: {type, text},
 });
@@ -67,3 +72,22 @@ export const socketConnect = (name, url) => dispatch => {
         })
     }
 };
+
+let timeout = null;
+export const sendStopTyping = () => dispatch => {
+    dispatch(sendMessage('Stop typing', MESSAGE_TYPE_USER_STOP_TYPING));
+    if (timeout) {
+        clearTimeout(timeout);
+        timeout = null;
+    }
+};
+export const sendStartTyping = () => dispatch => {
+    if (timeout) {
+        clearTimeout(timeout);
+    } else {
+        dispatch(sendMessage('Start typing', MESSAGE_TYPE_USER_START_TYPING));
+    }
+    timeout = setTimeout(() => dispatch(sendStopTyping()), 1000);
+};
+
+

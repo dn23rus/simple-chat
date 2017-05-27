@@ -4,8 +4,8 @@ import {socketConnect} from '../actions/connection'
 const ConnectionInput = ({wsUrl, dispatch}) => {
     let input;
     return (
-        <div className="ConnectionInput">
-            <form onSubmit={e => {
+        <div className="connection">
+            <form className="connection__form" onSubmit={e => {
                 e.preventDefault();
                 if (!input.value.trim()) {
                     return;
@@ -13,11 +13,11 @@ const ConnectionInput = ({wsUrl, dispatch}) => {
                 dispatch(socketConnect(input.value, wsUrl));
                 input.value = '';
             }}>
-                <label className="ConnectionInput_Label" htmlFor="name">Enter your name:</label>
-                <input className="ConnectionInput_Input" id="name" type="text" ref={node => {
+                <label className="connection__label" htmlFor="name">Enter your name:</label>
+                <input className="connection__input" id="name" maxLength="20" type="text" ref={node => {
                     input = node
                 }}/>
-                <button className="ConnectionInput_Button" type="submit">
+                <button className="connection__button" type="submit">
                     <span>Connect</span>
                 </button>
             </form>

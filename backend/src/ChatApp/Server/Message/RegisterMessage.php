@@ -2,29 +2,19 @@
 
 namespace ChatApp\Server\Message;
 
-class RegisterMessage implements MessageInterface
+class RegisterMessage extends AbstractMessage
 {
-    protected $data = [];
-
     /**
      * RegisterMessage constructor.
      *
-     * @param string $id
+     * @param string $identity
      */
-    public function __construct($id)
+    public function __construct($identity)
     {
         $this->data = [
             'type'     => self::TYPE_REGISTER,
-            'id'       => $id,
+            'identity' => $identity,
             'datetime' => (new \DateTime('now'))->format(self::DATETIME_FORMAT),
         ];
-    }
-
-    /**
-     * @inheritdoc
-     */
-    function jsonSerialize()
-    {
-        return $this->data;
     }
 }

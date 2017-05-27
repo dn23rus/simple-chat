@@ -5,7 +5,7 @@ import {Provider} from 'react-redux'
 import thunk from 'redux-thunk'
 import reducer from './reducers'
 import AppWrapper from './containers/AppWrapper'
-import './index.css'
+import './style.css'
 
 const store = createStore(reducer, {}, applyMiddleware(thunk));
 

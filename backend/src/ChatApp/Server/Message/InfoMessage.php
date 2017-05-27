@@ -2,10 +2,8 @@
 
 namespace ChatApp\Server\Message;
 
-class InfoMessage implements MessageInterface
+class InfoMessage extends AbstractMessage
 {
-    protected $data;
-
     /**
      * InfoMessage constructor.
      *
@@ -18,13 +16,5 @@ class InfoMessage implements MessageInterface
             'text'     => $text,
             'datetime' => (new \DateTime('now'))->format(self::DATETIME_FORMAT),
         ];
-    }
-
-    /**
-     * @inheritdoc
-     */
-    function jsonSerialize()
-    {
-        return $this->data;
     }
 }

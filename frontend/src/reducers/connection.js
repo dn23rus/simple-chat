@@ -12,13 +12,19 @@ import {
     MESSAGE_TYPE_REGISTER,
     MESSAGE_TYPE_MESSAGE,
     MESSAGE_TYPE_INFO,
-    MESSAGE_TYPE_DENIED
+    MESSAGE_TYPE_DENIED,
+    MESSAGE_TYPE_USER_CONNECTED,
+    MESSAGE_TYPE_USER_DISCONNECTED,
+    MESSAGE_TYPE_USERS_LIST
 } from '../constants'
+
+const messagesLimit = 500;
 
 const initialState = {
     socket: null,
     messages: [],
     username: null,
+    connectedUsers: [],
     identity: null,
     registered: false,
     connectionState: SOCKET_STATE_DISCONNECTED
@@ -29,31 +35,56 @@ const sendMessage = (webSocket, msg) => {
 };
 
 const handleMessage = (state, msg) => {
+    const appendMessage = (state, msg, checkOwn = false) => {
+        let message = {
+            ...{type: null, username: null, text: null, datetime: null, isOwn: false},
+            ...msg
+        };
+
+        if (checkOwn && msg.isOwn) {
+            return state;
+        }
+
+        return {
+            ...state,
+            messages: [...state.messages.slice(-1 * messagesLimit), message]
+        };
+    };
+
     switch (msg.type) {
         case MESSAGE_TYPE_REGISTER:
             sendMessage(state.socket, {
-                from: msg.id,
+                from: msg.identity,
                 type: 'REGISTER',
                 name: state.username,
             });
             return {
                 ...state,
-                identity: msg.id,
+                identity: msg.identity,
                 registered: true
             };
         case MESSAGE_TYPE_MESSAGE:
         case MESSAGE_TYPE_INFO:
-            let message = {
-                ...{type: null, username: null, text: null, datetime: null, isOwn: false},
-                ...msg
-            };
-            return {
+            return appendMessage(state, msg);
+        case MESSAGE_TYPE_USER_DISCONNECTED:
+            return appendMessage({
                 ...state,
-                messages: [...state.messages.slice(-19), message]
-            };
+                connectedUsers: state.connectedUsers.filter((u) => u.id !== msg.id)
+            }, msg);
+        case MESSAGE_TYPE_USER_CONNECTED:
+            let newState = {...state};
+            if (msg.isOwn) {
+                newState.username = msg.username;
+            } else {
+                newState.connectedUsers = [...state.connectedUsers, {id: msg.id, name: msg.username}];
+            }
+            return appendMessage(newState, msg, true);
+        case MESSAGE_TYPE_USERS_LIST:
+            return {...state, connectedUsers: msg.items};
         default:
-            return state;
+            break;
     }
+    return state;
 };
 
 const connection = (state = initialState, action) => {

@@ -2,21 +2,21 @@
 
 namespace ChatApp\Server\Message;
 
-class Message implements MessageInterface
+class Message extends AbstractMessage
 {
-    protected $data;
-
     /**
      * Message constructor.
      *
      * @param string $username
+     * @param string $id
      * @param string $text
      * @param bool   $isOwn
      */
-    public function __construct($username, $text, $isOwn = false)
+    public function __construct($username, $id, $text, $isOwn = false)
     {
         $this->data = [
             'type'     => self::TYPE_MESSAGE,
+            'id'       => $id,
             'username' => $username,
             'text'     => $text,
             'isOwn'    => $isOwn,
@@ -34,13 +34,5 @@ class Message implements MessageInterface
         $this->data['isOwn'] = (bool) $flag;
 
         return $this;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    function jsonSerialize()
-    {
-        return $this->data;
     }
 }

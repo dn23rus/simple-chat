@@ -2,10 +2,8 @@
 
 namespace ChatApp\Server\Message;
 
-class DeniedMessage implements MessageInterface
+class DeniedMessage extends AbstractMessage
 {
-    protected $data;
-
     /**
      * DeniedMessage constructor.
      *
@@ -18,13 +16,5 @@ class DeniedMessage implements MessageInterface
             'reason'   => $reason,
             'datetime' => (new \DateTime('now'))->format(self::DATETIME_FORMAT),
         ];
-    }
-
-    /**
-     * @inheritdoc
-     */
-    function jsonSerialize()
-    {
-        return $this->data;
     }
 }
