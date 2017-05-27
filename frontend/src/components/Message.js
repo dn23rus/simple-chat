@@ -36,7 +36,7 @@ const Message = ({type, username, text, datetime, isOwn}) => {
         case MESSAGE_TYPE_USER_DISCONNECTED:
             result = (
                 <p>
-                    <span className="message-panel__list-item-text message-panel__list-item-text_info">User [{username}] has been connected.</span>
+                    <span className="message-panel__list-item-text message-panel__list-item-text_info">User [{username}] has been disconnected.</span>
                     <span className="message-panel__list-item-datetime">[{datetime}]</span>
                 </p>
             );
