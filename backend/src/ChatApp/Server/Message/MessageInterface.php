@@ -14,5 +14,5 @@ interface MessageInterface extends \JsonSerializable
     const TYPE_STOP_TYPING = 'STOP_TYPING';
     const TYPE_USERS_LIST = 'USERS_LIST';
 
-    const DATETIME_FORMAT = 'd/m/Y h:i:s';
+    const DATETIME_FORMAT = \DateTime::ISO8601;
 }
