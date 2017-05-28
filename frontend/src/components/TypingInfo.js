@@ -45,18 +45,11 @@ class TypingInfo extends Component {
     render() {
         let doDisplay = this.props.users.length > 0;
         let users = this.props.users.slice(-3);
-        let text = '';
-        if (doDisplay) {
-            if (users.length > 1) {
-                text = `[${users.map((u)=> u.username).join(', ')}] are typing...`;
-            } else {
-                text = `[${users[0].username}] is typing...`;
-            }
-        }
         return (
             <div className="message-panel__typing-info">
-                <span className="message-panel__typing-text"
-                      style={{display: doDisplay ? 'block' : 'none'}}>{text}</span>
+                <span className="message-panel__typing-text" style={{display: doDisplay ? 'block' : 'none'}}>
+                    <strong>{users.map((u) => u.username).join(', ')}</strong> {users.length > 1 ? 'are' : 'is'} typing...
+                </span>
             </div>
         );
     }

@@ -37,7 +37,13 @@ const DesktopNotification = ({message, title}) => {
 
         if (body != null && icon != null) {
             return (
-                <Notification title={title} options={{body: body, icon}}/>
+                <Notification title={title} options={{body, icon}} onClick={() => {
+                    try {
+                        window.focus()
+                    } catch (e) {
+                        console.log(e);
+                    }
+                }} disableActiveWindow={true} timeout={3000}/>
             );
         }
     }
