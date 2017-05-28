@@ -16,7 +16,7 @@ const ConnectionInput = ({wsUrl, dispatch}) => {
                 <label className="connection__label" htmlFor="name">Enter your name:</label>
                 <input className="connection__input" id="name" maxLength="20" type="text" ref={node => {
                     input = node
-                }}/>
+                }} autoComplete="off" autoFocus/>
                 <button className="connection__button" type="submit">
                     <span>Connect</span>
                 </button>

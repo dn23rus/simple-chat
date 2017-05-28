@@ -23,7 +23,7 @@ const MessageInput = ({dispatch}) => {
                             dispatch(sendStartTyping());
                         }
                     }
-                }}/>
+                }} autoComplete="off" autoFocus/>
                 <button className="message-panel__submit" type="submit">
                     <span>Send</span>
                 </button>
