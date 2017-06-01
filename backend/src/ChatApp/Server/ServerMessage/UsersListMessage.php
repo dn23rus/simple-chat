@@ -1,6 +1,6 @@
 <?php
 
-namespace ChatApp\Server\Message;
+namespace ChatApp\Server\ServerMessage;
 
 class UsersListMessage extends AbstractMessage
 {
@@ -11,9 +11,6 @@ class UsersListMessage extends AbstractMessage
      */
     public function __construct(array $list)
     {
-        $this->data = [
-            'type'  => self::TYPE_USERS_LIST,
-            'items' => $list,
-        ];
+        $this->data['items'] = $list;
     }
 }

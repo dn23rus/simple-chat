@@ -1,14 +1,14 @@
 import {
+    APP_STATE_NOT_INITED,
+    APP_STATE_INITIALIZATION,
+    APP_STATE_READY,
+    APP_STATE_FAILED_INIT
+} from '../constants';
+import {
     APP_INIT_START,
     APP_INIT_FAIL,
     APP_INIT_OK
-} from '../actions/types'
-
-import {
-    APP_STATE_NOT_INITED,
-    APP_STATE_INITIALIZATION,
-    APP_STATE_READY
-} from '../constants';
+} from '../actions/types';
 
 const initialState = {
     appState: APP_STATE_NOT_INITED,
@@ -18,19 +18,16 @@ const initialState = {
 const init = (state = initialState, action) => {
     switch (action.type) {
         case APP_INIT_START:
-            return {
-                ...state,
-                appState: APP_STATE_INITIALIZATION
-            };
+            return {...state, appState:APP_STATE_INITIALIZATION};
         case APP_INIT_OK:
-            return {
-                ...state,
-                wsUrl: action.wsUrl,
-                appState: APP_STATE_READY
-            };
+            return {...state, appState: APP_STATE_READY, wsUrl:action.wsUrl};
+        case APP_INIT_FAIL:
+            return {...state, appState: APP_STATE_FAILED_INIT};
         default:
-            return state
+            break;
     }
+
+    return state;
 };
 
 export default init;

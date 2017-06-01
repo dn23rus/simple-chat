@@ -1,39 +1,38 @@
 import {
-    CHAT_RECEIVE_MESSAGE,
+    SOCKET_RECEIVE_MESSAGE,
     TEXT_TYPING_STOP_TIMEOUT
 } from '../actions/types'
 import {
-    MESSAGE_TYPE_MESSAGE,
-    MESSAGE_TYPE_USER_DISCONNECTED,
-    MESSAGE_TYPE_USER_START_TYPING,
-    MESSAGE_TYPE_USER_STOP_TYPING
+    S_MESSAGE_TYPE_MESSAGE_BROADCAST,
+    S_MESSAGE_TYPE_USER_DISCONNECTED_BROADCAST,
+    S_MESSAGE_TYPE_START_TYPING_BROADCAST,
+    S_MESSAGE_TYPE_STOP_TYPING_BROADCAST
 } from '../constants';
 
 const typing = (state = {users: []}, action) => {
+    let message = action.message;
     switch (action.type) {
-        case CHAT_RECEIVE_MESSAGE:
-            let users = [];
-            switch (action.message.type) {
-                case MESSAGE_TYPE_USER_START_TYPING:
+        case SOCKET_RECEIVE_MESSAGE:
+            switch (message.type) {
+                case S_MESSAGE_TYPE_START_TYPING_BROADCAST:
+                    let users = [];
                     let userOjb = {
-                        id: action.message.id,
-                        username: action.message.username,
+                        id: message.data.id,
+                        username: message.data.username,
                         createdAt: new Date()
                     };
-                    users = [...state.users.filter((item) => item.id !== action.message.id), userOjb];
-                    return {...state, users};
-                case MESSAGE_TYPE_MESSAGE:
-                case MESSAGE_TYPE_USER_DISCONNECTED:
-                case MESSAGE_TYPE_USER_STOP_TYPING:
-                    users = state.users.filter((item) => item.id !== action.message.id);
-                    return {...state, users};
+                    return {...state, users: [...state.users.filter((item) => item.id !== message.data.id), userOjb]};
+                case S_MESSAGE_TYPE_MESSAGE_BROADCAST:
+                case S_MESSAGE_TYPE_USER_DISCONNECTED_BROADCAST:
+                case S_MESSAGE_TYPE_STOP_TYPING_BROADCAST:
+                    users = state.users.filter((item) => item.id !== message.data.id);
+                    return {...state, users: state.users.filter((item) => item.id !== message.data.id)};
                 default:
                     break;
             }
             break;
         case TEXT_TYPING_STOP_TIMEOUT: {
-            let users = [...state.users.filter((item) => item.id !== action.user.id)];
-            return {...state, users};
+            return {...state, users: state.users.filter((item) => item.id !== action.user.id)};
         }
         default:
             break;

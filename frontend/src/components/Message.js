@@ -2,10 +2,9 @@ import React from 'react'
 import moment from 'moment-timezone';
 import browserLocale from 'browser-locale';
 import {
-    MESSAGE_TYPE_MESSAGE,
-    MESSAGE_TYPE_INFO,
-    MESSAGE_TYPE_USER_CONNECTED,
-    MESSAGE_TYPE_USER_DISCONNECTED
+    S_MESSAGE_TYPE_MESSAGE_BROADCAST,
+    S_MESSAGE_TYPE_USER_CONNECTED_BROADCAST,
+    S_MESSAGE_TYPE_USER_DISCONNECTED_BROADCAST
 } from '../constants';
 
 const Message = ({type, username, text, datetime, isOwn}) => {
@@ -30,7 +29,7 @@ const Message = ({type, username, text, datetime, isOwn}) => {
     datetime = formatDatetime(datetime);
     let result = null;
     switch (type) {
-        case MESSAGE_TYPE_MESSAGE:
+        case S_MESSAGE_TYPE_MESSAGE_BROADCAST:
             result = isOwn ? (
                     <p>
                         <span
@@ -46,7 +45,7 @@ const Message = ({type, username, text, datetime, isOwn}) => {
                     </p>
                 );
             break;
-        case MESSAGE_TYPE_USER_CONNECTED:
+        case S_MESSAGE_TYPE_USER_CONNECTED_BROADCAST:
             result = (
                 <p>
                     <span className="message-panel__list-item-text message-panel__list-item-text_info">New user [{username}] has been connected.</span>
@@ -54,18 +53,10 @@ const Message = ({type, username, text, datetime, isOwn}) => {
                 </p>
             );
             break;
-        case MESSAGE_TYPE_USER_DISCONNECTED:
+        case S_MESSAGE_TYPE_USER_DISCONNECTED_BROADCAST:
             result = (
                 <p>
                     <span className="message-panel__list-item-text message-panel__list-item-text_info">User [{username}] has been disconnected.</span>
-                    <span className="message-panel__list-item-datetime">[{datetime}]</span>
-                </p>
-            );
-            break;
-        case MESSAGE_TYPE_INFO:
-            result = (
-                <p>
-                    <span className="message-panel__list-item-text message-panel__list-item-text_info">{text}</span>
                     <span className="message-panel__list-item-datetime">[{datetime}]</span>
                 </p>
             );

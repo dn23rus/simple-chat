@@ -4,7 +4,7 @@ import DesktopNotification from '../components/DesktopNotification';
 const mapStateToProps = (state) => {
     let n = state.notification;
     return {
-        message: n.message
+        data: n.data
     };
 };
 

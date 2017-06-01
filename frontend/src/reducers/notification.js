@@ -1,27 +1,36 @@
 import {
-    CHAT_RECEIVE_MESSAGE
+    SOCKET_RECEIVE_MESSAGE
 } from '../actions/types'
 import {
-    MESSAGE_TYPE_MESSAGE,
-    MESSAGE_TYPE_INFO,
-    MESSAGE_TYPE_USER_CONNECTED,
-    MESSAGE_TYPE_USER_DISCONNECTED
+    S_MESSAGE_TYPE_USER_CONNECTED_BROADCAST,
+    S_MESSAGE_TYPE_USER_DISCONNECTED_BROADCAST,
+    S_MESSAGE_TYPE_MESSAGE_BROADCAST
 } from '../constants'
 
-const notification = (state = {message: null}, action) => {
+const notification = (state = {data: null}, action) => {
+    let message = action.message;
     switch (action.type) {
-        case CHAT_RECEIVE_MESSAGE:
-            switch (action.message.type) {
-                case MESSAGE_TYPE_MESSAGE:
-                case MESSAGE_TYPE_USER_DISCONNECTED:
-                case MESSAGE_TYPE_INFO:
+        case SOCKET_RECEIVE_MESSAGE:
+            switch (message.type) {
+                case S_MESSAGE_TYPE_MESSAGE_BROADCAST:
+                case S_MESSAGE_TYPE_USER_DISCONNECTED_BROADCAST:
                     return {
-                        message: action.message
+                        data: {
+                            type: message.type,
+                            isOwn: message.data.isOwn || false,
+                            username: message.data.username,
+                            text: message.data.text || null
+                        }
                     };
-                case MESSAGE_TYPE_USER_CONNECTED:
+                case S_MESSAGE_TYPE_USER_CONNECTED_BROADCAST:
                     if (!action.message.isOwn) {
                         return {
-                            message: action.message
+                            data: {
+                                type: message.type,
+                                isOwn: message.data.isOwn || false,
+                                username: message.data.username,
+                                text: null
+                            }
                         }
                     }
                     break;

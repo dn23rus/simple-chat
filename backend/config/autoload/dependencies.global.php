@@ -7,14 +7,16 @@ use Zend\Expressive\Helper;
 return [
     'dependencies' => [
         'invokables' => [
-            Helper\ServerUrlHelper::class       => Helper\ServerUrlHelper::class,
-            ChatApp\Server\ClientService::class => ChatApp\Server\ClientService::class,
+            \ChatApp\Server\ClientService::class => \ChatApp\Server\ClientService::class,
+            Helper\ServerUrlHelper::class        => Helper\ServerUrlHelper::class,
         ],
         'factories'  => [
-            Application::class                   => ApplicationFactory::class,
-            Helper\UrlHelper::class              => Helper\UrlHelperFactory::class,
-            ChatApp\Server\MessageHandler::class => ChatApp\Server\MessageHandlerFactory::class,
-            'ChatServer'                         => ChatApp\Server\ChatServerFactory::class,
+            Application::class                            => ApplicationFactory::class,
+            'ChatServer'                                  => \ChatApp\Server\ChatServerFactory::class,
+            \ChatApp\Console\Command\SetupCommand::class  => \ChatApp\Console\Command\SetupCommandFactory::class,
+            \ChatApp\Server\MessageHandler::class         => \ChatApp\Server\MessageHandlerFactory::class,
+            \Symfony\Component\Console\Application::class => \ChatApp\Console\ApplicationFactory::class,
+            Helper\UrlHelper::class                       => Helper\UrlHelperFactory::class,
         ],
     ],
 ];

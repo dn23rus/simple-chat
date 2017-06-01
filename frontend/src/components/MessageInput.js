@@ -1,5 +1,5 @@
 import React from 'react'
-import {sendMessage, sendStartTyping, sendStopTyping} from '../actions/connection'
+import {sendText, sendStartTyping, sendStopTyping} from '../actions/connection'
 
 const MessageInput = ({dispatch}) => {
     let input;
@@ -10,7 +10,7 @@ const MessageInput = ({dispatch}) => {
                 if (!input.value.trim()) {
                     return;
                 }
-                dispatch(sendMessage(input.value));
+                dispatch(sendText(input.value));
                 input.value = '';
             }}>
                 <input className="message-panel__input" id="message" type="text" ref={node => {

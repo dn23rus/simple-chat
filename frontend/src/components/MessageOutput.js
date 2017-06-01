@@ -10,7 +10,6 @@ class MessageOutput extends Component {
         messages: PropTypes.array.isRequired
     };
 
-
     constructor(props) {
         super(props);
         this.listItemIndex = 0;
@@ -35,7 +34,14 @@ class MessageOutput extends Component {
             return (
                 <div className="message-panel__output" id="messageOutput">
                     <ul className="message-panel__list">
-                        {messages.map(message => {
+                        {messages.map(msg => {
+                            let message = {
+                                type: msg.type,
+                                username: msg.data.username,
+                                text: msg.data.text || null,
+                                datetime: msg.datetime,
+                                isOwn: msg.data.isOwn || false
+                            };
                             return (
                                 <li key={this.listItemIndex++} className="message-panel__list-item">
                                     <Message {...message}/>

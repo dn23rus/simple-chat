@@ -2,21 +2,57 @@
 
 namespace ChatApp\Server;
 
-use ChatApp\Server\Message\DeniedMessage;
-use ChatApp\Server\Message\InfoMessage;
-use ChatApp\Server\Message\Message;
-use ChatApp\Server\Message\MessageInterface;
-use ChatApp\Server\Message\RegisterMessage;
-use ChatApp\Server\Message\StartTypingMessage;
-use ChatApp\Server\Message\StopTypingMessage;
-use ChatApp\Server\Message\UserConnectedMessage;
-use ChatApp\Server\Message\UserDisconnectedMessage;
-use ChatApp\Server\Message\UsersListMessage;
+use ChatApp\Server\ClientMessage\MessageWrapper;
+use ChatApp\Server\ServerMessage\DeniedMessage;
+use ChatApp\Server\ServerMessage\SimpleMessage;
+use ChatApp\Server\ServerMessage\TextMessage;
+use ChatApp\Server\ServerMessage\MessageInterface;
+use ChatApp\Server\ServerMessage\UsersListMessage;
 use Ratchet\ConnectionInterface;
 use Ratchet\MessageComponentInterface;
 
 class MessageHandler implements MessageComponentInterface
 {
+    const C_MESSAGE_TYPE_REGISTER      = 'REGISTER';
+    const C_MESSAGE_TYPE_MESSAGE       = 'MESSAGE';
+    const C_MESSAGE_TYPE_GET_USER_LIST = 'GET_USER_LIST';
+    const C_MESSAGE_TYPE_START_TYPING  = 'START_TYPING';
+    const C_MESSAGE_TYPE_STOP_TYPING   = 'STOP_TYPING';
+
+    const S_MESSAGE_TYPE_REGISTERED                  = 'REGISTERED';
+    const S_MESSAGE_TYPE_DENIED                      = 'DENIED';
+    const S_MESSAGE_TYPE_USER_LIST                   = 'USER_LIST';
+    const S_MESSAGE_TYPE_USER_CONNECTED_BROADCAST    = 'CONNECTED';
+    const S_MESSAGE_TYPE_USER_DISCONNECTED_BROADCAST = 'DISCONNECTED';
+    const S_MESSAGE_TYPE_MESSAGE_BROADCAST           = 'MESSAGE';
+    const S_MESSAGE_TYPE_START_TYPING_BROADCAST      = 'START_TYPING';
+    const S_MESSAGE_TYPE_STOP_TYPING_BROADCAST       = 'STOP_TYPING';
+
+    /**
+     * @var array
+     */
+    protected $clientMessageDataMap = [
+        self::C_MESSAGE_TYPE_REGISTER      => ['name'],
+        self::C_MESSAGE_TYPE_MESSAGE       => ['text'],
+        self::C_MESSAGE_TYPE_GET_USER_LIST => [],
+        self::C_MESSAGE_TYPE_START_TYPING  => [],
+        self::C_MESSAGE_TYPE_STOP_TYPING   => [],
+    ];
+
+    /**
+     * @var array
+     */
+    protected $serverMessageMap = [
+        self::S_MESSAGE_TYPE_REGISTERED                  => SimpleMessage::class,
+        self::S_MESSAGE_TYPE_DENIED                      => DeniedMessage::class,
+        self::S_MESSAGE_TYPE_USER_LIST                   => UsersListMessage::class,
+        self::S_MESSAGE_TYPE_USER_CONNECTED_BROADCAST    => SimpleMessage::class,
+        self::S_MESSAGE_TYPE_USER_DISCONNECTED_BROADCAST => SimpleMessage::class,
+        self::S_MESSAGE_TYPE_MESSAGE_BROADCAST           => TextMessage::class,
+        self::S_MESSAGE_TYPE_START_TYPING_BROADCAST      => SimpleMessage::class,
+        self::S_MESSAGE_TYPE_STOP_TYPING_BROADCAST       => SimpleMessage::class,
+    ];
+
     /**
      * @var ClientService
      */
@@ -27,10 +63,55 @@ class MessageHandler implements MessageComponentInterface
      */
     protected $clients;
 
+    /**
+     * @var array
+     */
+    protected $uniqueIds = [];
+
+    /**
+     * MessageHandler constructor.
+     *
+     * @param ClientService $clientService
+     */
     public function __construct(ClientService $clientService)
     {
         $this->clientService = $clientService;
         $this->clients = new \SplObjectStorage();
+    }
+
+    /**
+     * @param string $type
+     *
+     * @return MessageInterface
+     */
+    protected function createNewMessage($type)
+    {
+        $params = func_get_args();
+        array_shift($params);
+
+        $class = $this->serverMessageMap[$type];
+        $result = new $class(...$params);
+        $result->setType($type);
+
+        return $result;
+    }
+
+    /**
+     * @param string $msg
+     *
+     * @return MessageWrapper
+     */
+    protected function parseMessage($msg)
+    {
+        $msg = json_decode($msg, true, 25) ?: [];
+
+        $msg = array_replace_recursive(['type' => '', 'data' => []], $msg);
+        $msg['data'] = array_merge(
+            isset($this->clientMessageDataMap[$msg['type']]) ? $this->clientMessageDataMap[$msg['type']] : [],
+            isset($msg['data']) ? $msg['data'] : []
+        );
+
+        return new MessageWrapper($msg['type'], $msg['data']);
     }
 
     /**
@@ -39,7 +120,6 @@ class MessageHandler implements MessageComponentInterface
     function onOpen(ConnectionInterface $conn)
     {
         $this->clients->attach($conn);
-        $conn->send(json_encode(new RegisterMessage($this->clientService->generateClientId($conn->resourceId))));
     }
 
     /**
@@ -47,11 +127,12 @@ class MessageHandler implements MessageComponentInterface
      */
     function onClose(ConnectionInterface $conn)
     {
-        $username = isset($this->clients[$conn]['name']) ? $this->clients[$conn]['name'] : null;
         $id = isset($this->clients[$conn]['id']) ? $this->clients[$conn]['id'] : null;
+        $username = isset($this->clients[$conn]['name']) ? $this->clients[$conn]['name'] : null;
         $this->clients->detach($conn);
-        if ($username && !is_null($id)) {
-            $this->broadcastDisconnectedInfo($username, $id);
+        if ($id) {
+            unset($this->uniqueIds[$id]);
+            $this->broadcastDisconnectedInfo($id, $username);
         }
     }
 
@@ -68,53 +149,93 @@ class MessageHandler implements MessageComponentInterface
      */
     function onMessage(ConnectionInterface $from, $msg)
     {
-        $msg = json_decode($msg, true, 5);
-        if (null === $msg) {
-            $from->send(json_encode(new DeniedMessage('Unable to parse your message')));
+        $msg = $this->parseMessage($msg);
+
+        if (!$msg->isValid()) {
+            $response = $this->createNewMessage(
+                self::S_MESSAGE_TYPE_DENIED,
+                'Unable to parse your message',
+                DeniedMessage::INVALID_MESSAGE
+            );
+            $from->send($response);
 
             return;
         }
 
-        $msg = array_merge([
-            'from' => null,
-            'type' => null,
-        ], $msg);
-
-        if (!$this->clientService->verifyClientId($msg['from'], $from->resourceId)) {
-            $from->send(json_encode(new DeniedMessage('Invalid identifier')));
-
-            return;
-        }
-
-        switch ($msg['type']) {
-            case MessageInterface::TYPE_REGISTER:
-                $name = isset($msg['name']) ? $this->clientService->filterName($msg['name']) : null;
-                if ($name) {
-                    $this->clients->offsetSet($from, [
-                        'name' => $name,
-                        'id'   => uniqid(),
-                    ]);
-                    $this->broadcastConnectedInfo($from);
+        switch ($msg->getType()) {
+            case self::C_MESSAGE_TYPE_REGISTER:
+                if (!$this->isClientRegistered($from)) {
+                    $name = $this->clientService->filterName($msg->name);
+                    if ($name) {
+                        $id = $this->getUniqueId();
+                        $this->clients->offsetSet($from, [
+                            'id'   => $id,
+                            'name' => $name,
+                        ]);
+                        $from->send($this->createNewMessage(self::S_MESSAGE_TYPE_REGISTERED, $id, $name));
+                        $this->broadcastConnectedInfo($from);
+                    } else {
+                        $response = $this->createNewMessage(
+                            self::S_MESSAGE_TYPE_DENIED,
+                            'Invalid username',
+                            DeniedMessage::INVALID_NAME
+                        );
+                        $from->send($response);
+                    }
+                } // else do nothing
+                break;
+            case self::C_MESSAGE_TYPE_GET_USER_LIST:
+                if ($this->isClientRegistered($from)) {
                     $this->sendConnectedUserList($from);
-                } else {
-                    $from->close();
                 }
                 break;
-            case MessageInterface::TYPE_MESSAGE:
-                $text = isset($msg['text']) ? $this->clientService->filterMessage($msg['text']) : null;
-                if ($text) {
-                    $this->broadCastMessage($from, $msg['text']);
+            case self::C_MESSAGE_TYPE_MESSAGE:
+                if ($this->isClientRegistered($from)) {
+                    $text = $this->clientService->filterMessage($msg->text);
+                    if ($text) {
+                        $this->broadCastMessage($from, $text);
+                    }
                 }
                 break;
-            case MessageInterface::TYPE_START_TYPING:
-                $this->broadcastStartTyping($from);
+            case self::C_MESSAGE_TYPE_START_TYPING:
+                if ($this->isClientRegistered($from)) {
+                    $this->broadcastTypingInfo($from, self::S_MESSAGE_TYPE_START_TYPING_BROADCAST);
+                }
                 break;
-            case MessageInterface::TYPE_STOP_TYPING:
-                $this->broadcastStopTyping($from);
+            case self::C_MESSAGE_TYPE_STOP_TYPING:
+                if ($this->isClientRegistered($from)) {
+                    $this->broadcastTypingInfo($from, self::S_MESSAGE_TYPE_STOP_TYPING_BROADCAST);
+                }
                 break;
             default:
                 break;
         }
+    }
+
+    /**
+     * @param ConnectionInterface $conn
+     *
+     * @return bool
+     */
+    protected function isClientRegistered(ConnectionInterface $conn)
+    {
+        return isset($this->clients[$conn]['id']);
+    }
+
+    /**
+     * @param int $length
+     *
+     * @return string
+     */
+    protected function getUniqueId($length = 16)
+    {
+        $id = $this->clientService->generateRandomString($length);
+        while (isset($this->uniqueIds[$id])) {
+            $id = $this->clientService->generateRandomString($length);
+        }
+        $this->uniqueIds[$id] = $id;
+
+        return $id;
     }
 
     /**
@@ -125,28 +246,21 @@ class MessageHandler implements MessageComponentInterface
      */
     protected function broadCastMessage(ConnectionInterface $from, $text)
     {
-        $message = new Message($this->clients[$from]['name'], $this->clients[$from]['id'], $text);
-        foreach ($this->clients as $client) {
-            $message->setIsOwn($client === $from);
-            $client->send(json_encode($message));
-        }
-    }
+        /** @var TextMessage $message */
+        $message = $this->createNewMessage(
+            self::S_MESSAGE_TYPE_MESSAGE_BROADCAST,
+            $this->clients[$from]['id'],
+            $this->clients[$from]['name'],
+            $text
 
-    /**
-     * @param string              $text
-     * @param ConnectionInterface $from
-     * @param bool                $excludeSelf
-     *
-     * @return void
-     */
-    protected function broadCastInfo($text, ConnectionInterface $from = null, $excludeSelf = false)
-    {
-        $message = new InfoMessage($text);
+        );
         foreach ($this->clients as $client) {
-            if ($excludeSelf && $client === $from) {
+            if (!$this->isClientRegistered($client)) {
                 continue;
             }
-            $client->send(json_encode($message));
+            $message->setIsOwn($client === $from);
+
+            $client->send($message);
         }
     }
 
@@ -157,56 +271,54 @@ class MessageHandler implements MessageComponentInterface
      */
     protected function broadcastConnectedInfo(ConnectionInterface $from)
     {
-        $message = new UserConnectedMessage($this->clients[$from]['name'], $this->clients[$from]['id']);
+        $message = $this->createNewMessage(
+            self::S_MESSAGE_TYPE_USER_CONNECTED_BROADCAST,
+            $this->clients[$from]['id'],
+            $this->clients[$from]['name']
+        );
         foreach ($this->clients as $client) {
-            $message->setIsOwn($client === $from);
-            $client->send(json_encode($message));
+            if (!$this->isClientRegistered($client)) {
+                continue;
+            }
+            if ($client === $from) {
+                continue;
+            }
+            $client->send($message);
         }
     }
 
     /**
-     * @param string     $username
      * @param string|int $id
+     * @param string     $username
      *
      * @return void
      */
-    protected function broadcastDisconnectedInfo($username, $id)
+    protected function broadcastDisconnectedInfo($id, $username)
     {
-        $message = new UserDisconnectedMessage($username, $id);
+        $message = $this->createNewMessage(self::S_MESSAGE_TYPE_USER_DISCONNECTED_BROADCAST, $id, $username);
         foreach ($this->clients as $client) {
-            $client->send(json_encode($message));
+            if (!$this->isClientRegistered($client)) {
+                continue;
+            }
+            $client->send($message);
         }
     }
 
     /**
      * @param ConnectionInterface $from
-     *
-     * @return void
+     * @param string              $type
      */
-    protected function broadcastStartTyping(ConnectionInterface $from)
+    protected function broadcastTypingInfo(ConnectionInterface $from, $type)
     {
-        $message = new StartTypingMessage($this->clients[$from]['name'], $this->clients[$from]['id']);
+        $message = $this->createNewMessage($type, $this->clients[$from]['id'], $this->clients[$from]['name']);
         foreach ($this->clients as $client) {
+            if (!$this->isClientRegistered($client)) {
+                continue;
+            }
             if ($client === $from) {
                 continue;
             }
-            $client->send(json_encode($message));
-        }
-    }
-
-    /**
-     * @param ConnectionInterface $from
-     *
-     * @return void
-     */
-    protected function broadcastStopTyping(ConnectionInterface $from)
-    {
-        $message = new StopTypingMessage($this->clients[$from]['name'], $this->clients[$from]['id']);
-        foreach ($this->clients as $client) {
-            if ($client === $from) {
-                continue;
-            }
-            $client->send(json_encode($message));
+            $client->send($message);
         }
     }
 
@@ -219,17 +331,16 @@ class MessageHandler implements MessageComponentInterface
     {
         $storage = $this->clients;
         $storage->rewind();
-        $result = [];
+        $items = [];
         while ($storage->valid()) {
-            $current = $storage->current();
-            if ($current !== $to) {
-                $result[] = $storage->getInfo();
-            }
+            $items[] = $storage->getInfo();
             $storage->next();
         }
 
         $storage->rewind();
 
-        $to->send(json_encode(new UsersListMessage($result)));
+        $message = $this->createNewMessage(self::S_MESSAGE_TYPE_USER_LIST, $items);
+
+        $to->send($message);
     }
 }

@@ -5,7 +5,8 @@ const mapStateToProps = (state) => {
     let c = state.connection;
     return {
         username: c.username,
-        users: c.connectedUsers
+        users: c.connectedUsers,
+        id: c.identity
     };
 };
 

@@ -1,14 +1,21 @@
 import React, {Component} from 'react';
-import PropTypes from 'prop-types'
+import PropTypes from 'prop-types';
+import {requestUserList} from '../actions/connection';
 
 class UserList extends Component {
     static propTypes = {
+        id: PropTypes.string.isRequired,
         username: PropTypes.string.isRequired,
         users: PropTypes.array.isRequired
     };
 
+    componentDidMount() {
+        let dispatch = this.props.dispatch;
+        dispatch(requestUserList());
+    }
+
     render() {
-        let users = this.props.users;
+        let users = this.props.users.filter((item) => item.id !== this.props.id);
         users.sort((a, b) => {
             return a.name.localeCompare(b.name);
         });

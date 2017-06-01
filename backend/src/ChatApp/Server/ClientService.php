@@ -4,18 +4,6 @@ namespace ChatApp\Server;
 
 class ClientService
 {
-    protected $salt;
-
-    /**
-     * ClientService constructor.
-     *
-     * @param null $salt
-     */
-    public function __construct($salt = null)
-    {
-        $this->salt = $salt ?: $this->generateRandomString(32);
-    }
-
     /**
      * @param string $name
      * @param int    $length
@@ -43,37 +31,13 @@ class ClientService
     }
 
     /**
-     * @param $resourceId
-     *
-     * @return string
-     */
-    public function generateClientId($resourceId)
-    {
-        return uniqid(md5($resourceId . $this->salt), true);
-    }
-
-    /**
-     * @param $id
-     * @param $resourceId
-     *
-     * @return bool
-     */
-    public function verifyClientId($id, $resourceId)
-    {
-        return hash_equals(
-            substr($id, 0, 32),
-            md5($resourceId . $this->salt)
-        );
-    }
-
-    /**
      * @param int $length
      *
      * @return string
      */
-    protected function generateRandomString($length = 10)
+    public function generateRandomString($length = 10)
     {
-        $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        $characters = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
         $charactersLength = strlen($characters);
         $randomString = '';
         for ($i = 0; $i < $length; $i++) {

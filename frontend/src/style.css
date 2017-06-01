@@ -26,6 +26,8 @@ p {
   .app__column_2 {
     flex: 4 590px;
     margin: 0 5px; }
+  .app__column_text-center {
+    text-align: center; }
 
 .connection {
   margin: 0 auto;
