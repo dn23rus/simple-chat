@@ -13,8 +13,8 @@ const MessageInput = ({dispatch}) => {
                 dispatch(sendText(input.value));
                 input.value = '';
             }}>
-                <input className="message-panel__input" id="message" type="text" ref={node => {
-                    input = node
+                <input className="message-panel__input" id="messageInput" type="text" ref={node => {
+                    input = node;
                 }} onKeyDown={e => {
                     if (input.value.trim()) {
                         if (e.which === 13) {

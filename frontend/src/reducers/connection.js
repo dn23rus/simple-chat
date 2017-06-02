@@ -41,7 +41,7 @@ const handleMessage = (state, message) => {
             );
         case S_MESSAGE_TYPE_USER_DISCONNECTED_BROADCAST:
             return appendMessage(
-                {...state, connectedUsers: [state.connectedUsers.filter(item => item.id !== data.id)]},
+                {...state, connectedUsers: [...state.connectedUsers.filter(item => item.id !== data.id)]},
                 message
             );
         case S_MESSAGE_TYPE_USER_LIST:

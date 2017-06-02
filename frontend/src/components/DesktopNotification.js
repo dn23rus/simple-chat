@@ -1,4 +1,5 @@
 import React, {Component} from 'react'
+import ReactDOM from 'react-dom'
 import Notification from 'react-web-notification/lib/components/Notification';
 import {
     S_MESSAGE_TYPE_MESSAGE_BROADCAST,
@@ -74,7 +75,8 @@ class DesktopNotification extends Component {
                 return (
                     <Notification title={title} options={{body, icon}} onClick={() => {
                         try {
-                            window.focus()
+                            window.focus();
+                            document.getElementById('messageInput').focus();
                         } catch (e) {
                             console.log(e);
                         }
