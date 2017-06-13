@@ -12,6 +12,7 @@
 }
 
 $textColor: gray;
+$textInfoColor: #76d0d6;
 $controlColor: #43a2ff;
 $appBackgroundColor: #f4f0ff;
 
@@ -121,14 +122,14 @@ p {
   }
   &__list-item-text_info {
     font-style: italic;
-    color: #76d0d6;
+    color: $textInfoColor;
     margin: 0 5px 0 0;
   }
   &__list-item-datetime {
     float: right;
     font-size: 10px;
+    color: $textInfoColor;
   }
-
 
   &__typing-info {
     padding-left: 10px;

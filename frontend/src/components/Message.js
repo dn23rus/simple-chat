@@ -35,13 +35,13 @@ const Message = ({type, username, text, datetime, isOwn}) => {
                         <span
                             className="message-panel__list-item-username message-panel__list-item-username_own">(me):</span>
                         <span className="message-panel__list-item-text">{text}</span>
-                        <span className="message-panel__list-item-datetime">[{datetime}]</span>
+                        <span className="message-panel__list-item-datetime">{datetime}</span>
                     </p>
                 ) : (
                     <p>
                         <span className="message-panel__list-item-username">{username}:</span>
                         <span className="message-panel__list-item-text">{text}</span>
-                        <span className="message-panel__list-item-datetime">[{datetime}]</span>
+                        <span className="message-panel__list-item-datetime">{datetime}</span>
                     </p>
                 );
             break;
@@ -49,7 +49,7 @@ const Message = ({type, username, text, datetime, isOwn}) => {
             result = (
                 <p>
                     <span className="message-panel__list-item-text message-panel__list-item-text_info">New user [{username}] has been connected.</span>
-                    <span className="message-panel__list-item-datetime">[{datetime}]</span>
+                    <span className="message-panel__list-item-datetime">{datetime}</span>
                 </p>
             );
             break;
@@ -57,7 +57,7 @@ const Message = ({type, username, text, datetime, isOwn}) => {
             result = (
                 <p>
                     <span className="message-panel__list-item-text message-panel__list-item-text_info">User [{username}] has been disconnected.</span>
-                    <span className="message-panel__list-item-datetime">[{datetime}]</span>
+                    <span className="message-panel__list-item-datetime">{datetime}</span>
                 </p>
             );
             break;

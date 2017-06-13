@@ -101,7 +101,8 @@ p {
     margin: 0 5px 0 0; }
   .message-panel__list-item-datetime {
     float: right;
-    font-size: 10px; }
+    font-size: 10px;
+    color: #76d0d6; }
   .message-panel__typing-info {
     padding-left: 10px;
     line-height: 1em;
